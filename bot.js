@@ -84,13 +84,17 @@ ${videos.map(video2 => `**${++index} -** ${video2.title}`).join('\n')}
 			return handleVideo(video, msg, voiceChannel);
 		}
 	} else if(command === "help") {
-		if (!msg.member.voiceChannel) return msg.channel.send('Comandos: show, fila, play, pause, resume, stop, skip e dev!');
-		if (!serverQueue) return msg.channel.send('Comandos: show, fila, play, pause, resume, stop, skip e dev!');
-		return msg.channel.send('Comandos: show, fila, play, pause, resume, stop, skip e dev!');
+		if (!msg.member.voiceChannel) return msg.channel.send('Comandos: msg, show, fila, play, pause, resume, stop, skip e dev!');
+		if (!serverQueue) return msg.channel.send('Comandos: msg,show, fila, play, pause, resume, stop, skip e dev!');
+		return msg.channel.send('Comandos: msg, show, fila, play, pause, resume, stop, skip e dev!');
 	} else if(command === "dev") {
 		if (!msg.member.voiceChannel) return msg.channel.send('Meu desenvolvedor é o Líder Revolucionário Slide Boy!');
 		if (!serverQueue) return msg.channel.send('Meu desenvolvedor é o Líder Revolucionário Slide Boy!');
 		return msg.channel.send('Meu desenvolvedor é o Líder Revolucionário Slide Boy!');
+	}else if (command === "msg") {
+		if (!msg.member.voiceChannel) return msg.channel.send('Vai Tomar no cu tranquilo, Moro!');
+		if (!serverQueue) return msg.channel.send("Vai Tomar no cu tranquilo, Moro!");
+        return msg.channel.send("Vai Tomar no cu tranquilo, Moro!");
 	} else if (command === 'skip') {
 		if (!msg.member.voiceChannel) return msg.channel.send('Você não está em um canal de voz!');
 		if (!serverQueue) return msg.channel.send('Não há música tocando.');
@@ -101,7 +105,7 @@ ${videos.map(video2 => `**${++index} -** ${video2.title}`).join('\n')}
 		if (!serverQueue) return msg.channel.send('Não há música tocando.');
 		serverQueue.songs = [];
 		serverQueue.connection.dispatcher.end('Pausado!');
-		return undefined;
+		return msg.channel.send("Bye");
 	 //else if (command === 'volume') {
 		//if (!msg.member.voiceChannel) return msg.channel.send('Você não está em um canal!');
 		//if (!serverQueue) return msg.channel.send('Nada tocando.');
