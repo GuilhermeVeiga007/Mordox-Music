@@ -22,7 +22,7 @@ client.on('reconnecting', () => console.log('reconnecting'));
 client.on('message', async msg => { 
 	if (msg.author.bot) return undefined;
 	if (!msg.content.startsWith(PREFIX)) return undefined;
-
+	
 	const args = msg.content.split(' ');
 	const searchString = args.slice(1).join(' ');
 	const url = args[1] ? args[1].replace(/<(.+)>/g, '$1') : '';
@@ -43,9 +43,10 @@ client.on('message', async msg => {
 			return msg.channel.send('Preciso de permissão para tocar neste canal!');
 		}
 
-		if (url.match(/^https?:\/\/(www.youtube.com|youtube.com)\/playlist(.*)$/)) {
+		if (url.match(/^https?:\/\/(www.youtube.com|youtube.com|soundcloud.com|www.soundcloud.com)\/playlist(.*)$/)) {
 			const playlist = await youtube.getPlaylist(url);
-			const videos = await playlist.getVideos();
+			const videos = await playlist.getVideos()
+
 			for (const video of Object.values(videos)) {
 				const video2 = await youtube.getVideoByID(video.id);
 				await handleVideo(video2, msg, voiceChannel, true);  
@@ -84,28 +85,37 @@ ${videos.map(video2 => `**${++index} -** ${video2.title}`).join('\n')}
 			return handleVideo(video, msg, voiceChannel);
 		}
 	} else if(command === "help") {
-		if (!msg.member.voiceChannel) return msg.channel.send('Comandos: msg, show, fila, play, pause, resume, stop, skip e dev!');
-		if (!serverQueue) return msg.channel.send('Comandos: msg,show, fila, play, pause, resume, stop, skip e dev!');
-		return msg.channel.send('Comandos: msg, show, fila, play, pause, resume, stop, skip e dev!');
+		if (!msg.member.voiceChannel) return msg.channel.send('Comandos:\nnext\nhelplay\nmsg\nnow\nfila\nplay\npause\nresume\nstop\nskip\ndev');
+		if (!serverQueue) return msg.channel.send('Comandos:\nnext\nhelplay\nmsg\nnow\nfila\nplay\npause\nresume\nstop\nskip\ndev');
+		return msg.channel.send('Comandos:\nnext\nhelplay\nmsg\nnow\nfila\nplay\npause\nresume\nstop\nskip\ndev');
+
+    } else if(command === "helplay") {
+		if (!msg.member.voiceChannel) return msg.channel.send('~play bons tempos jhonatan walace\n\n 1 (opção a ser tocada)');
+		if (!serverQueue) return msg.channel.send('~play bons tempos jhonatan walace\n\n 1 (opção a ser tocada)');
+		return msg.channel.send('~play bons tempos jhonatan walace\n\n 1 (opção a ser tocada)');
+
 	} else if(command === "dev") {
 		if (!msg.member.voiceChannel) return msg.channel.send('Meu desenvolvedor é o Líder Revolucionário Slide Boy!');
 		if (!serverQueue) return msg.channel.send('Meu desenvolvedor é o Líder Revolucionário Slide Boy!');
 		return msg.channel.send('Meu desenvolvedor é o Líder Revolucionário Slide Boy!');
+
 	}else if (command === "msg") {
-		if (!msg.member.voiceChannel) return msg.channel.send('Vai Tomar no cu tranquilo, Moro!');
-		if (!serverQueue) return msg.channel.send("Vai Tomar no cu tranquilo, Moro!");
-        return msg.channel.send("Vai Tomar no cu tranquilo, Moro!");
+		if (!msg.member.voiceChannel) return msg.channel.send('Estou em faze de desenvolvimento, por enquanto só links do Youtube!\nEm breve terei atualizações!');
+		if (!serverQueue) return msg.channel.send("Estou em faze de desenvolvimento, por enquanto só links do Youtube!\nEm breve terei atualizações!");
+		return msg.channel.send("Estou em faze de desenvolvimento, por enquanto só links do Youtube!\nEm breve terei atualizações!");
+		
 	} else if (command === 'skip') {
 		if (!msg.member.voiceChannel) return msg.channel.send('Você não está em um canal de voz!');
 		if (!serverQueue) return msg.channel.send('Não há música tocando.');
 		serverQueue.connection.dispatcher.end('Skipped!');
 		return undefined;
+
 	} else if (command === 'stop') {
 		if (!msg.member.voiceChannel) return msg.channel.send('Você não está em um canal de voz!');
 		if (!serverQueue) return msg.channel.send('Não há música tocando.');
 		serverQueue.songs = [];
 		serverQueue.connection.dispatcher.end('Pausado!');
-		return msg.channel.send("Bye");
+		return msg.channel.send("**Música Removida** bye!");
 	 //else if (command === 'volume') {
 		//if (!msg.member.voiceChannel) return msg.channel.send('Você não está em um canal!');
 		//if (!serverQueue) return msg.channel.send('Nada tocando.');
@@ -113,16 +123,23 @@ ${videos.map(video2 => `**${++index} -** ${video2.title}`).join('\n')}
 		//serverQueue.volume = args[1];
 		//serverQueue.connection.dispatcher.setVolumeLogarithmic(args[1] / 5);
 		//return msg.channel.send(`Volume definido para: **${args[1]}**`);
-	} else if (command === 'show') {
-		if (!serverQueue) return msg.channel.send('Nada Tocando.');
+	   
+	} else if (command === 'now') {
+		if (!serverQueue) return msg.channel.send('Nada Tocando!');
 		return msg.channel.send(`🎶 Tocando agora: **${serverQueue.songs[0].title}**`);
+
+	} else if (command === "next") {
+		if (!serverQueue) return msg.channel.send('Nada Tocando!');
+		return msg.channel.send(`Próxima Música **${serverQueue.songs[1].title}**`);
+
 	} else if (command === 'fila') {
 		if (!serverQueue) return msg.channel.send('Nada tocando.');
 		return msg.channel.send(`
-__**Música na fila:**__
+__**Músicas na Fila:**__
 ${serverQueue.songs.map(song => `**-** ${song.title}`).join('\n')}
-**Lets go:** ${serverQueue.songs[0].title}
+**Próxima Música:** ${serverQueue.songs[1].title}\n**Tocando Agora:** ${serverQueue.songs[0].title}
 		`);
+
 	} else if (command === 'pause') {
 		if (serverQueue && serverQueue.playing) {
 			serverQueue.playing = false;
@@ -130,6 +147,7 @@ ${serverQueue.songs.map(song => `**-** ${song.title}`).join('\n')}
 			return msg.channel.send('⏸ pausado!');
 		}
 		return msg.channel.send('Nada tocando.');
+
 	} else if (command === 'resume') {
 		if (serverQueue && !serverQueue.playing) {
 			serverQueue.playing = true;
@@ -203,5 +221,4 @@ function play(guild, song) {
 
 	serverQueue.textChannel.send(`🎶 Começando o Show: **${song.title}**`);
 }
-
 client.login(token);
